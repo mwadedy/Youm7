@@ -3,6 +3,7 @@ import csv
 from lxml import html
 
 def scrape_page(url):
+    # Function to fetch the webpage content using the provided URL
     response = requests.get(url)
     if response.status_code == 200:
         return html.fromstring(response.text)
@@ -10,6 +11,7 @@ def scrape_page(url):
         return None
 
 def extract_data(tree):
+    # Function to extract data (Title, Link, Date, Synopsis) from the webpage's HTML tree using XPath
     titles = tree.xpath('/html/body/section/div[3]/div/div/div/div/div[1]/div[3]/div/h3/a/text()')
     links = tree.xpath('/html/body/section/div[3]/div/div/div/div/div[1]/div[3]/div/h3/a/@href')
     dates = tree.xpath('//*[@id="paging"]/div[3]/div/span/text()')
@@ -17,9 +19,12 @@ def extract_data(tree):
     return zip(titles, links, dates, synopses)
 
 def save_to_csv(data):
+    # Function to save the extracted data to a CSV file named "youm7.csv"
     with open("youm7.csv", mode="w", encoding="utf-8", newline="") as file:
         writer = csv.writer(file)
+        # Write header row to the CSV file
         writer.writerow(["Title", "Link", "Date", "Synopsis"])
+        # Write each row of data to the CSV file
         writer.writerows(data)
 
 def main():
@@ -29,13 +34,16 @@ def main():
 
     all_data = []
 
+    # Loop through the range of pages to scrape data from each page
     for page_num in range(start_page, end_page + 1):
         url = base_url + str(page_num)
         tree = scrape_page(url)
         if tree is not None:
+            # Extract data from the page and add it to the 'all_data' list
             data = extract_data(tree)
             all_data.extend(data)
 
+    # Save all the extracted data to the CSV file
     save_to_csv(all_data)
 
 if __name__ == "__main__":
